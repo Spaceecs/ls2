@@ -98,28 +98,20 @@ export default function App() {
   };
 
   const handleUploadImage = async () => {
-    if (!image) {
-      Alert.alert('No image selected', 'Please pick an image first!');
+    if (!imageBase64) {
+      Alert.alert('No image selected', 'Please pick an image from the list!');
       return;
     }
 
+    const base64DataUrl = `data:image/jpeg;base64,${imageBase64}`;
     const formData = new FormData();
-    formData.append('file', {
-      uri: image,
-      name: 'name_image.jpg',
-      type: 'image/jpeg',
-    });
+    formData.append('file', base64DataUrl);
     formData.append('upload_preset', 'my_images');
 
     try {
       const response = await fetch('https://api.cloudinary.com/v1_1/di5iqorka/image/upload', {
         method: 'POST',
         body: formData,
-        headers: {
-          // Додано заголовки
-          'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json',
-        },
       });
 
       const data = await response.json();
@@ -131,7 +123,7 @@ export default function App() {
       }
 
       if (data.secure_url) {
-        setImageUrl(data.secure_url); // Переконайся, що setImageUrl існує
+        setImageUrl(data.secure_url);
         await AsyncStorage.setItem('image', data.secure_url);
         Alert.alert('Success', 'Image uploaded successfully!');
       } else {
@@ -143,10 +135,11 @@ export default function App() {
     }
   };
 
+
   return (
       <View style={styles.container}>
         <Button title="Open Camera" onPress={handleOpenCamera} />
-        {image && <Button title="Upload to Cloudinary" onPress={handleUploadImage} />}
+        <Button title="Upload to Cloudinary" onPress={handleUploadImage} />
 
         {imageBase64 ? (
             <Image
